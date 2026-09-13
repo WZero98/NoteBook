@@ -92,9 +92,9 @@ ViT (2020) ── 分类
 
 ### 2.2 宏观结构（对照图）
 
-![EfficientViT 宏观结构（原论文 Figure 5）](assets/EfficientViT%20structure.png)
+![EfficientViT 宏观结构（原论文 Figure 5）](../assets/EfficientViT%20structure.png)
 
-上图（`assets/EfficientViT structure.png`）即论文 **Figure 5**：标准 **Backbone + Head（Encoder–Decoder）**。
+上图（`../assets/EfficientViT structure.png`）即论文 **Figure 5**：标准 **Backbone + Head（Encoder–Decoder）**。
 
 | 部分 | 内容 |
 |------|------|
@@ -108,9 +108,9 @@ ViT (2020) ── 分类
 
 ### 2.3 EfficientViT Module 与多尺度线性注意力
 
-![EfficientViT 构建块与多尺度线性注意力（原论文 Figure 2）](assets/EfficientViT%20multiscale%20RELU%20attention.png)
+![EfficientViT 构建块与多尺度线性注意力（原论文 Figure 2）](../assets/EfficientViT%20multiscale%20RELU%20attention.png)
 
-上图（`assets/EfficientViT multiscale RELU attention.png`）即论文 **Figure 2**：
+上图（`../assets/EfficientViT multiscale RELU attention.png`）即论文 **Figure 2**：
 
 | 侧 | 内容 |
 |----|------|
@@ -171,7 +171,7 @@ Image
 
 ## 3. Python 模块实现
 
-实现目录：[`code/efficientvit/`](code/efficientvit/)：
+实现目录：[`../code/efficientvit/`](../code/efficientvit/)：
 
 | 文件 | 内容 |
 |------|------|
@@ -190,7 +190,7 @@ Image
 ### 3.1 LiteMLA 核心（摘要）
 
 ```python
-# code/efficientvit/attention.py（逻辑摘要）
+# ../code/efficientvit/attention.py（逻辑摘要）
 qkv = Conv1x1(x)
 ms = [qkv] + [DW_then_Group1x1(qkv) for scale in scales]
 y = ReLU_LinearAttn(cat(ms))   # 或序列很短时用 quadratic 形式
@@ -201,7 +201,7 @@ y = Conv1x1_proj(y)
 
 ```python
 import sys
-sys.path.insert(0, r".\code")
+sys.path.insert(0, r"..\code")
 
 import torch
 from efficientvit import build_efficientvit_seg, efficientvit_seg_b1
@@ -222,7 +222,7 @@ m0 = efficientvit_seg_b0(in_channels=3, num_classes=19)
 ### 3.3 快速自检
 
 ```bash
-python -c "import sys; sys.path.insert(0,'code'); import torch; from efficientvit import build_efficientvit_seg; \
+python -c "import sys; sys.path.insert(0,'../code'); import torch; from efficientvit import build_efficientvit_seg; \
 m=build_efficientvit_seg('b0', num_classes=10); y=m(torch.randn(1,3,256,256)); print(y.shape)"
 ```
 
@@ -235,7 +235,7 @@ m=build_efficientvit_seg('b0', num_classes=10); y=m(torch.randn(1,3,256,256)); p
 1. **ViT 系列**从分类走向层次化与密集预测；高效路线的关键是在保留全局建模的同时压低高分辨率下的延迟。  
 2. **EfficientViT** 用 **多尺度 ReLU 线性注意力 + 卷积局部增强**，在 Cityscapes / ADE20K 上达到与 SegFormer / SegNeXt 同档甚至更高的精度，同时在多类硬件上更快。  
 3. **EfficientViT-Seg** 采用「Stage3/4 插 EfficientViT 模块 + P2/P3/P4 相加融合 + 轻量 MBConv 头」的简洁配方。  
-4. 本目录 `code/efficientvit/` 提供 B0–B3 可运行分割实现，可直接接入训练脚本；更大 L 系列与预训练权重见官方仓库。
+4. 本目录 `../code/efficientvit/` 提供 B0–B3 可运行分割实现，可直接接入训练脚本；更大 L 系列与预训练权重见官方仓库。
 
 ### 参考文献
 

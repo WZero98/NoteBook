@@ -95,9 +95,9 @@ ViT / SETR (单尺度 + PE + 重解码)
 
 ### 2.2 总体结构（对照图）
 
-![SegFormer 框架示意（原论文 Figure 2）](assets/SegFormer-structure.png)
+![SegFormer 框架示意（原论文 Figure 2）](../assets/SegFormer-structure.png)
 
-上图（`assets/SegFormer-structure.png`）即论文 **Figure 2**，整体分为左右两块：
+上图（`../assets/SegFormer-structure.png`）即论文 **Figure 2**，整体分为左右两块：
 
 | 模块 | 作用 |
 |------|------|
@@ -199,7 +199,7 @@ Image
 
 ## 3. Python 模块实现
 
-实现目录：[`code/segformer/`](code/segformer/)：
+实现目录：[`../code/segformer/`](../code/segformer/)：
 
 | 文件 | 内容 |
 |------|------|
@@ -219,7 +219,7 @@ Image
 ### 3.1 编码器核心（摘要）
 
 ```python
-# code/segformer/mit_encoder.py（逻辑摘要）
+# ../code/segformer/mit_encoder.py（逻辑摘要）
 class OverlapPatchEmbed(nn.Module):
     """Conv 重叠切 patch → flatten → LayerNorm"""
 
@@ -236,7 +236,7 @@ class MixVisionTransformer(nn.Module):
 ### 3.2 解码器核心（摘要）
 
 ```python
-# code/segformer/mlp_decoder.py（逻辑摘要）
+# ../code/segformer/mlp_decoder.py（逻辑摘要）
 for feat, proj in zip(features, self.linear_c):
     tokens = proj(feat)                    # Linear: Ci → C
     fmap = tokens → (B, C, Hi, Wi)
@@ -250,7 +250,7 @@ mask = Conv1x1(fused)                      # → Ncls
 
 ```python
 import sys
-sys.path.insert(0, r".\code")
+sys.path.insert(0, r"..\code")
 
 import torch
 from segformer import SegFormer, mit_b2
@@ -283,7 +283,7 @@ model.load_pretrained(r"path/to/mit_b2.pth")  # 或完整 segformer 权重
 在笔记根目录执行：
 
 ```bash
-python -c "import sys; sys.path.insert(0,'code'); import torch; from segformer import SegFormer; \
+python -c "import sys; sys.path.insert(0,'../code'); import torch; from segformer import SegFormer; \
 m=SegFormer(num_classes=10, encoder='mit_b0'); y=m(torch.randn(1,3,256,256)); print(y.shape)"
 ```
 
@@ -296,7 +296,7 @@ m=SegFormer(num_classes=10, encoder='mit_b0'); y=m(torch.randn(1,3,256,256)); pr
 1. **SegFormer** 用 **分层无 PE 的 MiT** 解决 ViT/SETR 的单尺度与分辨率插值问题，用 **All-MLP** 证明「编码器感受野足够时，重型解码器不是必须」。  
 2. **B0–B5** 覆盖实时到高精度；Cityscapes / ADE20K 成绩与开源权重使其成为通用语义分割强基线。  
 3. 后续 **SegNeXt、FeedFormer、U-MixFormer、SegFormer3D、SegFormer++** 等或改注意力、或改解码、或走向 3D/加速，但仍多继承「多尺度分层特征 + 轻融合」的精神。  
-4. 本目录 `code/segformer/` 提供与论文 Figure 2 / Eq. 3–4 对齐的可运行实现，可直接嵌入分割训练脚本。
+4. 本目录 `../code/segformer/` 提供与论文 Figure 2 / Eq. 3–4 对齐的可运行实现，可直接嵌入分割训练脚本。
 
 ### 参考文献
 

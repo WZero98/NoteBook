@@ -101,9 +101,9 @@ Dilation 高精度骨干（DeepLab / PSP）
 
 ### 2.3 总体结构（对照图）
 
-![DDRNet 分割总览（原论文 Figure 4）](assets/DDRNet-structure.png)
+![DDRNet 分割总览（原论文 Figure 4）](../assets/DDRNet-structure.png)
 
-上图（`assets/DDRNet-structure.png`）即论文 **Figure 4**：
+上图（`../assets/DDRNet-structure.png`）即论文 **Figure 4**：
 
 | 符号 | 含义 |
 |------|------|
@@ -126,9 +126,9 @@ Image
 
 ### 2.4 双边融合（Bilateral Fusion）
 
-![双边融合细节（原论文 Figure 3）](assets/Bilateral%20fusion%20in%20DDRNet.png)
+![双边融合细节（原论文 Figure 3）](../assets/Bilateral%20fusion%20in%20DDRNet.png)
 
-上图（`assets/Bilateral fusion in DDRNet.png`）对应论文 **Figure 3** 与 Eq. 1：
+上图（`../assets/Bilateral fusion in DDRNet.png`）对应论文 **Figure 3** 与 Eq. 1：
 
 - **Low → High**：低分辨率特征经 **1×1 Conv+BN** 压通道，再 **×2 双线性上采样**，与高分辨率残差输出 **逐点相加**，之后再 ReLU。  
 - **High → Low**：高分辨率特征经 **3×3 Conv（stride=2）+BN** 下采样并对齐通道，再与低分辨率残差输出相加，之后再 ReLU。
@@ -138,9 +138,9 @@ DDRNet 在多个 stage 重复该交换，使细节支路被语义反复增强，
 
 ### 2.5 DAPPM（Deep Aggregation Pyramid Pooling）
 
-![DAPPM 结构（原论文 Figure 5）](assets/DAPP%20module%20in%20DDRNet.png)
+![DAPPM 结构（原论文 Figure 5）](../assets/DAPP%20module%20in%20DDRNet.png)
 
-上图（`assets/DAPP module in DDRNet.png`）即论文 **Figure 5** / Eq. 2：
+上图（`../assets/DAPP module in DDRNet.png`）即论文 **Figure 5** / Eq. 2：
 
 1. 输入为低分辨率支路末端特征（约 **1/64**）。  
 2. 并行：恒等 1×1，以及 AvgPool（k=5/s=2，k=9/s=4，k=17/s=8）与 **全局池化**，各接 1×1 后上采样回原尺寸。  
@@ -169,7 +169,7 @@ DDRNet 在多个 stage 重复该交换，使细节支路被语义反复增强，
 
 ## 3. Python 模块实现
 
-实现目录：[`code/ddrnet/`](code/ddrnet/)：
+实现目录：[`../code/ddrnet/`](../code/ddrnet/)：
 
 | 文件 | 内容 |
 |------|------|
@@ -189,7 +189,7 @@ DDRNet 在多个 stage 重复该交换，使细节支路被语义反复增强，
 ### 3.1 DAPPM 核心（摘要）
 
 ```python
-# code/ddrnet/dappm.py（逻辑摘要）
+# ../code/ddrnet/dappm.py（逻辑摘要）
 y0 = Conv1x1(x)
 y1 = Conv3x3(upsample(pool5(x)) + y0)
 y2 = Conv3x3(upsample(pool9(x)) + y1)
@@ -201,7 +201,7 @@ out = Conv1x1(cat(y0..y4)) + Conv1x1_shortcut(x)
 ### 3.2 双分辨率主干（摘要）
 
 ```python
-# code/ddrnet/ddrnet.py（逻辑摘要）
+# ../code/ddrnet/ddrnet.py（逻辑摘要）
 x = stem → layer1 → layer2                    # 至 1/8
 # 多次：
 #   low  = layer3/4(low)
@@ -217,7 +217,7 @@ logits = SegHead(ctx + high) → upsample ×8
 
 ```python
 import sys
-sys.path.insert(0, r"d:\WPY\Documents\笔记记录\code")
+sys.path.insert(0, r"..\code")
 
 import torch
 from ddrnet import build_ddrnet, get_ddrnet_23_slim
@@ -242,7 +242,7 @@ main, aux = m39(x)
 在笔记根目录执行：
 
 ```bash
-python -c "import sys; sys.path.insert(0,'code'); import torch; from ddrnet import build_ddrnet; \
+python -c "import sys; sys.path.insert(0,'../code'); import torch; from ddrnet import build_ddrnet; \
 m=build_ddrnet('ddrnet23_slim', num_classes=10); y=m(torch.randn(1,3,256,256)); print(y.shape)"
 ```
 
@@ -255,7 +255,7 @@ m=build_ddrnet('ddrnet23_slim', num_classes=10); y=m(torch.randn(1,3,256,256)); 
 1. **多 pathway 系列**从 BiSeNet 的「浅细节 + 深语义」走到 DDRNet 的「**双深分辨率 + 多次双边融合**」，再被 PIDNet 扩展为带边界支路的三通路。  
 2. **DDRNet** 用 DAPPM 在 1/64 特征上廉价换取多尺度上下文，在 Cityscapes / CamVid 上取得当时顶尖的实时–精度折中（slim 约 **77.4% @ 102 FPS**）。  
 3. 主应用集中在**自动驾驶、车载边缘与智能交通**等需要实时路景解析的场景。  
-4. 本目录 `code/ddrnet/` 提供与论文 Fig. 3–5 对齐的可运行实现，可直接嵌入分割训练脚本。
+4. 本目录 `../code/ddrnet/` 提供与论文 Fig. 3–5 对齐的可运行实现，可直接嵌入分割训练脚本。
 
 ### 参考文献
 

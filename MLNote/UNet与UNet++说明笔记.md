@@ -73,9 +73,9 @@ U-Net 系列在 **MICCAI、ISBI、Medical Image Analysis** 等社区引用极高
 
 ### 2.2 总体结构（对照图）
 
-![U-Net 结构示意（原论文图）](assets/UNet-structure.png)
+![U-Net 结构示意（原论文图）](../assets/UNet-structure.png)
 
-上图（`assets/UNet-structure.png`）即经典 U-Net：
+上图（`../assets/UNet-structure.png`）即经典 U-Net：
 
 - **左侧收缩路径（contracting / encoder）**：重复「两个 \(3\times3\) conv + ReLU」再接 **\(2\times2\) max-pool（stride 2）**；每下采样一次，通道数通常翻倍（64→128→256→512→1024）。
 - **底部瓶颈（bottleneck）**：最深层的双卷积，感受野最大、语义最强。
@@ -118,9 +118,9 @@ U-Net 的关键洞察：**分割既要「看懂是什么」（深语义），也
 
 ### 3.2 总体结构（对照图）
 
-![UNet++ 结构示意（原论文图）](assets/UNet++-structure.png)
+![UNet++ 结构示意（原论文图）](../assets/UNet++-structure.png)
 
-上图（`assets/UNet++-structure.png`）分三部分：
+上图（`../assets/UNet++-structure.png`）分三部分：
 
 **(a) 整体**  
 节点 \(X^{i,j}\)：\(i\) 为下采样深度，\(j\) 为该深度上嵌套 skip 路径中的第 \(j\) 个卷积块。
@@ -172,7 +172,7 @@ X^{i,j} = H\Big(\big[\,[X^{i,k}]_{k=0}^{j-1},\; U(X^{i+1,j-1})\,\big]\Big)
 
 ## 4. Python 模块实现
 
-实现目录：[`code/unet/`](code/unet/)：
+实现目录：[`../code/unet/`](../code/unet/)：
 
 | 文件 | 内容 |
 |------|------|
@@ -185,7 +185,7 @@ X^{i,j} = H\Big(\big[\,[X^{i,k}]_{k=0}^{j-1},\; U(X^{i+1,j-1})\,\big]\Big)
 ### 4.1 基础块（摘要）
 
 ```python
-# code/unet/unet_blocks.py（核心逻辑摘要）
+# ../code/unet/unet_blocks.py（核心逻辑摘要）
 class ConvNormAct(nn.Module):
     """Conv → Norm → Act → Dropout"""
 
@@ -200,7 +200,7 @@ class Upsampling(nn.Module):
 
 ```python
 import sys
-sys.path.insert(0, r".\code")
+sys.path.insert(0, r"..\code")
 
 import torch
 from unet import UNet
@@ -251,7 +251,7 @@ loss = sum(criterion(o, y) for o in outs) / len(outs)
 ### 4.4 节点网格实现要点（与论文公式对齐）
 
 ```python
-# 伪代码：与 code/unet/unetpp.py 中 _forward_nodes 一致
+# 伪代码：与 ../code/unet/unetpp.py 中 _forward_nodes 一致
 feats[0][0] = H(x)                          # X^{0,0}
 for i in 1..L:
     feats[i][0] = H(pool(feats[i-1][0]))    # encoder
@@ -270,7 +270,7 @@ for j in 1..L:
 在笔记根目录执行：
 
 ```bash
-python -c "import sys; sys.path.insert(0,'code'); import torch; from unet import UNet, UNetPlusPlus; \
+python -c "import sys; sys.path.insert(0,'../code'); import torch; from unet import UNet, UNetPlusPlus; \
 print(UNet(1,2,32)(torch.randn(1,1,128,128)).shape); \
 m=UNetPlusPlus(3,2); m.eval(); print(m(torch.randn(1,3,128,128)).shape)"
 ```
@@ -284,7 +284,7 @@ m=UNetPlusPlus(3,2); m.eval(); print(m(torch.randn(1,3,128,128)).shape)"
 1. **U-Net** 用对称 U + skip 同时保留语义与定位，奠定医学分割范式。  
 2. **UNet++** 用嵌套稠密 skip 缓解语义鸿沟，并用深度监督换取精度与可剪枝部署。  
 3. 近年 **UNet 3+、TransUNet、Swin-UNet、nnU-Net、Mamba-UNet** 等仍多围绕 U 形演化；选型时优先基线与数据配方，再叠结构。  
-4. 本目录 `code/unet/` 提供与图示、公式一致的可运行实现，可直接嵌入分割训练脚本。
+4. 本目录 `../code/unet/` 提供与图示、公式一致的可运行实现，可直接嵌入分割训练脚本。
 
 ### 参考文献
 

@@ -96,9 +96,9 @@ FCN (2015)
 
 ### 2.3 总体结构（对照图）
 
-![DeepLabv3+ 结构示意（原论文 Figure 2）](assets/DeepLabV3+-structure.png)
+![DeepLabv3+ 结构示意（原论文 Figure 2）](../assets/DeepLabV3+-structure.png)
 
-上图（`assets/DeepLabV3+-structure.png`）即论文 **Figure 2**，蓝框为 **Encoder**，红框为 **Decoder**：
+上图（`../assets/DeepLabV3+-structure.png`）即论文 **Figure 2**，蓝框为 **Encoder**，红框为 **Decoder**：
 
 | 模块 | 作用 |
 |------|------|
@@ -181,7 +181,7 @@ Image (H×W)
 
 ## 3. Python 模块实现
 
-实现目录：[`code/deeplab/`](code/deeplab/)：
+实现目录：[`../code/deeplab/`](../code/deeplab/)：
 
 | 文件 | 内容 |
 |------|------|
@@ -194,7 +194,7 @@ Image (H×W)
 ### 3.1 ASPP 核心（摘要）
 
 ```python
-# code/deeplab/aspp.py（逻辑摘要）
+# ../code/deeplab/aspp.py（逻辑摘要）
 branches = [
     Conv1x1_BN_ReLU(C_in → 256),
     Atrous3x3(rate) for rate in (6, 12, 18),   # 或 separable
@@ -207,7 +207,7 @@ y = Dropout(0.5)(y)
 ### 3.2 解码器核心（摘要）
 
 ```python
-# code/deeplab/decoder.py（逻辑摘要）
+# ../code/deeplab/decoder.py（逻辑摘要）
 low = Conv1x1_BN_ReLU(C_low → 48)(feature["low_level"])
 high = ASPP(feature["out"])
 high = upsample(high, size=low.shape[-2:])      # ×4 对齐到 H/4
@@ -219,7 +219,7 @@ return upsample(logits, size=input_HW)          # 再 ×4 回原图
 
 ```python
 import sys
-sys.path.insert(0, r".\code")
+sys.path.insert(0, r"..\code")
 
 import torch
 from deeplab import DeepLabV3Plus, build_deeplabv3plus
@@ -256,7 +256,7 @@ m4 = DeepLabV3Plus(num_classes=2, in_channels=4, backbone="resnet50", pretrained
 在笔记根目录执行：
 
 ```bash
-python -c "import sys; sys.path.insert(0,'code'); import torch; from deeplab import DeepLabV3Plus; \
+python -c "import sys; sys.path.insert(0,'../code'); import torch; from deeplab import DeepLabV3Plus; \
 m=DeepLabV3Plus(num_classes=10, backbone='resnet50', pretrained_backbone=False); \
 y=m(torch.randn(1,3,256,256)); print(y.shape)"
 ```
@@ -270,7 +270,7 @@ y=m(torch.randn(1,3,256,256)); print(y.shape)"
 1. **DeepLab 系列**沿着「空洞卷积控分辨率 → ASPP 多尺度 → 去 CRF → 加轻解码器」演进；**DeepLabv3+** 把金字塔上下文与编解码边界恢复合到同一框架。  
 2. 论文在 VOC / Cityscapes 上达到当时顶尖（Xception + 预训练可达 VOC test **89.0%**、Cityscapes test **82.1%**），并因开源与 torchvision / mmseg 生态成为长期强基线。  
 3. 近年大量「××-DeepLabv3+」工作（轻量骨干、遥感插件、改进 ASPP、注意力 skip）说明：**v3+ 的 Encoder(ASPP)+Decoder 接口非常适合做领域定制。**  
-4. 本目录 `code/deeplab/` 提供与论文 Figure 2 对齐的可运行实现，可直接嵌入分割训练脚本。
+4. 本目录 `../code/deeplab/` 提供与论文 Figure 2 对齐的可运行实现，可直接嵌入分割训练脚本。
 
 ### 参考文献
 
