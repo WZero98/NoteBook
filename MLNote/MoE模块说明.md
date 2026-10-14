@@ -13,15 +13,15 @@
 稀疏 MoE 的核心思想是：
 
 - **总参数量大**（专家数量 × 单专家容量），模型表达能力强；
-- **每次前向只激活少数专家（top-\(k\)）**，计算量接近稠密小模型，而非与总参数成正比。
+- **每次前向只激活少数专家（top-$k$）**，计算量接近稠密小模型，而非与总参数成正比。
 
-对 token / 样本 \(x\)，令专家为 \(\{E_1,\ldots,E_N\}\)，门控给出路由权重 \(g_i(x)\)，稀疏形式可写为：
+对 token / 样本 $x$，令专家为 $\{E_1,\ldots,E_N\}$，门控给出路由权重 $g_i(x)$，稀疏形式可写为：
 
-\[
+$$
 y = \sum_{i \in \mathrm{TopK}(g(x))} g_i(x)\, E_i(x)
-\]
+$$
 
-常见设定是 \(k=1\)（Switch）或 \(k=2\)（许多现代 LLM MoE）。
+常见设定是 $k=1$（Switch）或 $k=2$（许多现代 LLM MoE）。
 
 ### 1.2 渊源：Switch Transformers
 
@@ -32,7 +32,7 @@ y = \sum_{i \in \mathrm{TopK}(g(x))} g_i(x)\, E_i(x)
 
 该工作在更早的稀疏门控 MoE（Shazeer et al., 2017）与 GShard 等基础上，做了工程上极有影响的简化：
 
-- 用 **top-1 路由（Switch routing）** 替代复杂的 top-\(k\) / 多损失设计，降低通信与实现复杂度；
+- 用 **top-1 路由（Switch routing）** 替代复杂的 top-$k$ / 多损失设计，降低通信与实现复杂度；
 - 用可微的 **辅助负载均衡损失（auxiliary load balancing / switch loss）** 抑制「路由坍塌」（少数专家吃掉绝大多数 token）；
 - 引入 **专家容量（expert capacity）** 等分布式训练细节，使万亿级稀疏模型可训。
 
@@ -43,7 +43,7 @@ y = \sum_{i \in \mathrm{TopK}(g(x))} g_i(x)\, E_i(x)
 | 阶段 | 代表 | 要点 |
 |------|------|------|
 | 经典 MoE | Jacobs et al. 等 | 多个专家 + 门控，多为稠密混合 |
-| 稀疏门控 | Shazeer et al., 2017 | top-\(k\) 稀疏激活，大规模语言模型 |
+| 稀疏门控 | Shazeer et al., 2017 | top-$k$ 稀疏激活，大规模语言模型 |
 | GShard | Lepikhin et al. | 把 MoE 做到超大 Transformer |
 | Switch | Fedus et al., 2021 | top-1 + 简化均衡损失，推向万亿参数 |
 
@@ -69,7 +69,7 @@ DeepSeek 开源模型在「总参数很大、激活参数相对较小、推理�
 
 | 作用 | 说明 |
 |------|------|
-| **扩容不线性涨算力** | 增加专家数 → 总参数↑；保持 top-\(k\) → 单次 FLOPs 大致不变 |
+| **扩容不线性涨算力** | 增加专家数 → 总参数↑；保持 top-$k$ → 单次 FLOPs 大致不变 |
 | **条件计算 / 特化** | 不同输入走不同专家，利于领域、语言、模式上的分工 |
 | **训练–推理成本权衡** | 训练可利用海量参数；推理只跑激活专家，延迟更友好 |
 | **替换稠密 FFN** | 在 Transformer 中最常见：把部分/全部 FFN 换成 MoE 层 |
@@ -97,9 +97,9 @@ DeepSeek 开源模型在「总参数很大、激活参数相对较小、推理�
 
 稀疏路由若无约束，门控容易把几乎所有 token 分给少数专家（**routing collapse**），其余专家得不到梯度、形同虚设。因此训练时常在主任务损失外加 **辅助损失**：
 
-\[
+$$
 \mathcal{L} = \mathcal{L}_{\mathrm{task}} + \alpha\, \mathcal{L}_{\mathrm{balance}} + \beta\, \mathcal{L}_{z} + \cdots
-\]
+$$
 
 下面介绍最常用的两类；并补充同主题文献中常见的变体。
 
@@ -107,28 +107,28 @@ DeepSeek 开源模型在「总参数很大、激活参数相对较小、推理�
 
 出处：**Switch Transformers** · [10.48550/ARXIV.2101.03961](https://doi.org/10.48550/arXiv.2101.03961)
 
-对一批 \(T\) 个 token、\(N\) 个专家，定义：
+对一批 $T$ 个 token、$N$ 个专家，定义：
 
-- \(f_i\)：实际被路由到专家 \(i\) 的 token **占比**（由 hard top-\(k\) 决策统计，对 \(f\) 通常不可微）；
-- \(P_i\)：门控对该专家的 **平均路由概率**（对 soft 概率可微）。
+- $f_i$：实际被路由到专家 $i$ 的 token **占比**（由 hard top-$k$ 决策统计，对 $f$ 通常不可微）；
+- $P_i$：门控对该专家的 **平均路由概率**（对 soft 概率可微）。
 
-\[
+$$
 f_i = \frac{1}{T}\sum_{t=1}^{T} \mathbf{1}\{\mathrm{argmax}\,g(x_t)=i\}
 \qquad
 P_i = \frac{1}{T}\sum_{t=1}^{T} g_i(x_t)
-\]
+$$
 
 Switch 辅助损失：
 
-\[
+$$
 \mathcal{L}_{\mathrm{switch}} = \alpha \cdot N \cdot \sum_{i=1}^{N} f_i\, P_i
-\]
+$$
 
 直观理解：
 
-- 希望 \(f_i \approx P_i \approx 1/N\)（均匀）；
-- \(\sum_i f_i P_i\) 在均匀时等于 \(1/N\)，乘以 \(N\) 后量级与专家数无关；
-- \(\alpha\) 常用 \(10^{-2}\) 量级：足够推动均衡，又不压过主损失。
+- 希望 $f_i \approx P_i \approx 1/N$（均匀）；
+- $\sum_i f_i P_i$ 在均匀时等于 $1/N$，乘以 $N$ 后量级与专家数无关；
+- $\alpha$ 常用 $10^{-2}$ 量级：足够推动均衡，又不压过主损失。
 
 [arXiv:2604.13761](https://doi.org/10.48550/arXiv.2604.13761) 在 CNN 稀疏 MoE 实验中也将 switch loss 描述为：通过让平均路由概率贴近均匀先验，促进专家激活均衡；并与 importance / entropy 等损失对比，发现 **switch 往往带来最均匀的专家利用率**，而 entropy 有时 mIoU 更高但坍塌更明显——说明「均衡」与「任务指标」不必完全同向。
 
@@ -139,16 +139,16 @@ Switch 辅助损失：
 
 门控 logits 若无界增大，softmax 在低精度（尤其 bfloat16）下易数值不稳，训练出现尖峰甚至发散。**Z-loss** 惩罚 logits 的 log-sum-exp 幅度：
 
-\[
+$$
 \mathcal{L}_{z} = \frac{1}{T}\sum_{t=1}^{T}
 \left(
 \log \sum_{i=1}^{N} e^{z_{t,i}}
 \right)^{2}
 = \frac{1}{T}\sum_{t=1}^{T}
 \big(\mathrm{logsumexp}(z_t)\big)^{2}
-\]
+$$
 
-其中 \(z_t\) 为 token \(t\) 上各专家的 **原始 logits**（softmax 之前）。系数 \(\beta\)（或 \(c_z\)）通常很小（如 \(10^{-3}\)～\(10^{-4}\) 量级，依实现而定）。
+其中 $z_t$ 为 token $t$ 上各专家的 **原始 logits**（softmax 之前）。系数 $\beta$（或 $c_z$）通常很小（如 $10^{-3}$～$10^{-4}$ 量级，依实现而定）。
 
 要点：
 
@@ -171,7 +171,7 @@ Switch 辅助损失：
 
 以下用 **线性层** 作为最小专家，实现：
 
-1. Top-\(k\) MoE 模块；
+1. Top-$k$ MoE 模块；
 2. Switch（load balancing）loss；
 3. Router z-loss。
 
@@ -350,7 +350,7 @@ if __name__ == "__main__":
 ### 实现备注
 
 - 上面的专家循环实现清晰但较慢；生产中常用 `einsum` / 分组 matmul / 专用 kernel（Megatron、DeepSpeed-MoE、FlashMoE 等）。
-- Switch 原文以 **top-1** 定义 \(f_i\)；top-\(k\) 时常用「对选中专家做 soft 计数再归一」的推广，如上代码。
+- Switch 原文以 **top-1** 定义 $f_i$；top-$k$ 时常用「对选中专家做 soft 计数再归一」的推广，如上代码。
 - DeepSeek-V3 等已可走 **无辅助损失偏置均衡**；笔记仍保留经典 switch / z-loss，便于对照文献与复现早期配方。
 
 ---

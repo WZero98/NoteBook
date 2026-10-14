@@ -101,19 +101,19 @@ ViT / SETR (单尺度 + PE + 重解码)
 
 | 模块 | 作用 |
 |------|------|
-| **Hierarchical Transformer Encoder（MiT）** | 重叠 Patch Embed → 四级 Stage → 输出 \(\{F_1..F_4\}\) |
+| **Hierarchical Transformer Encoder（MiT）** | 重叠 Patch Embed → 四级 Stage → 输出 $\{F_1..F_4\}$ |
 | **Lightweight All-MLP Decoder** | 四级特征各自 MLP → 上采样对齐 → Concat → MLP 融合 → 分类 |
 
-对输入 \(H\times W\times 3\)：先按约 **\(4\times4\)** 粒度进入 Stage-1（相对 ViT 的 \(16\times16\) 更利于密集预测），四级特征分辨率约为：
+对输入 $H\times W\times 3$：先按约 **$4\times4$** 粒度进入 Stage-1（相对 ViT 的 $16\times16$ 更利于密集预测），四级特征分辨率约为：
 
-\[
+$$
 \frac{H}{4}\times\frac{W}{4}\times C_1,\;
 \frac{H}{8}\times\frac{W}{8}\times C_2,\;
 \frac{H}{16}\times\frac{W}{16}\times C_3,\;
 \frac{H}{32}\times\frac{W}{32}\times C_4
-\]
+$$
 
-解码器输出分辨率为 \(\frac{H}{4}\times\frac{W}{4}\times N_{cls}\)（训练/评测时常再双线性插值到原图）。
+解码器输出分辨率为 $\frac{H}{4}\times\frac{W}{4}\times N_{cls}$（训练/评测时常再双线性插值到原图）。
 
 ### 2.3 编码器：Mix Transformer（MiT）
 
@@ -121,22 +121,22 @@ ViT / SETR (单尺度 + PE + 重解码)
 
 图中 Stage 之间的 **Overlap Patch Merging** 用卷积实现「重叠」合并，保留邻域连续性（非重叠 patch 会切断边界）。常用设置：
 
-- Stage-1：\(K=7,\; S=4,\; P=3\) → \(\frac{H}{4}\)
-- Stage-2/3/4：\(K=3,\; S=2,\; P=1\) → 依次 \(\frac{H}{8},\frac{H}{16},\frac{H}{32}\)
+- Stage-1：$K=7,\; S=4,\; P=3$ → $\frac{H}{4}$
+- Stage-2/3/4：$K=3,\; S=2,\; P=1$ → 依次 $\frac{H}{8},\frac{H}{16},\frac{H}{32}$
 
 #### （2）Transformer Block = Efficient Self-Attn + Mix-FFN
 
-图中放大的 **Transformer Block** 重复 \(N\) 次（由 B0–B5 的 `depths` 决定）：
+图中放大的 **Transformer Block** 重复 $N$ 次（由 B0–B5 的 `depths` 决定）：
 
 **Efficient Self-Attention**  
-标准注意力复杂度 \(O(N^2)\)。MiT 对 \(K,V\) 做序列缩减（论文 reduction ratio \(R\)；实现上常用 stride=\(R\) 的卷积，使空间边长缩 \(R\)、序列缩 \(R^2\)）。各级典型 `sr_ratio = [8, 4, 2, 1]`，对应序列缩减约 \([64,16,4,1]\)，复杂度降为约 \(O(N^2/R)\)。
+标准注意力复杂度 $O(N^2)$。MiT 对 $K,V$ 做序列缩减（论文 reduction ratio $R$；实现上常用 stride=$R$ 的卷积，使空间边长缩 $R$、序列缩 $R^2$）。各级典型 `sr_ratio = [8, 4, 2, 1]`，对应序列缩减约 $[64,16,4,1]$，复杂度降为约 $O(N^2/R)$。
 
 **Mix-FFN（取代显式位置编码）**  
-ViT 的固定 PE 在「训练分辨率 ≠ 测试分辨率」时需要插值，易掉点。SegFormer 主张分割任务可不显式加 PE，改在 FFN 中插入 \(3\times3\)（深度）卷积，利用零填充泄露位置信息：
+ViT 的固定 PE 在「训练分辨率 ≠ 测试分辨率」时需要插值，易掉点。SegFormer 主张分割任务可不显式加 PE，改在 FFN 中插入 $3\times3$（深度）卷积，利用零填充泄露位置信息：
 
-\[
+$$
 \mathbf{x}_{out}=\mathrm{MLP}\big(\mathrm{GELU}(\mathrm{Conv}_{3\times3}(\mathrm{MLP}(\mathbf{x}_{in})))\big)+\mathbf{x}_{in}
-\]
+$$
 
 这与图中 **Mix-FFN** 标注一致，也是「任意分辨率推理更稳」的关键设计。
 
@@ -157,16 +157,16 @@ ViT 的固定 PE 在「训练分辨率 ≠ 测试分辨率」时需要插值，�
 
 图中右侧放大给出每个 stage 特征经 **MLP → Upsample → Concat** 的流程。对应论文 Eq. 4：
 
-\[
+$$
 \begin{aligned}
 \hat{F}_i &= \mathrm{Linear}(C_i, C)(F_i),\quad i=1..4 \\
 \hat{F}_i &\leftarrow \mathrm{Upsample}_{\frac{H}{4}\times\frac{W}{4}}(\hat{F}_i) \\
 F &= \mathrm{Linear}(4C, C)(\mathrm{Concat}(\{\hat{F}_i\})) \\
 M &= \mathrm{Linear}(C, N_{cls})(F)
 \end{aligned}
-\]
+$$
 
-工程实现里，「融合用的 Linear」常写成 **\(1\times1\) Conv + BN + ReLU**（与 MMSeg / 官方一致）；分类为 \(1\times1\) Conv。  
+工程实现里，「融合用的 Linear」常写成 **$1\times1$ Conv + BN + ReLU**（与 MMSeg / 官方一致）；分类为 $1\times1$ Conv。  
 官方默认：`C=256`（B0/B1），`C=768`（B2–B5）。
 
 **为何这么简单还有效？**  
@@ -177,9 +177,9 @@ M &= \mathrm{Linear}(C, N_{cls})(F)
 | 对比项 | SETR | SegFormer |
 |--------|------|-----------|
 | 编码器 | ViT（常 ImageNet-22K） | 分层 MiT（ImageNet-1K 即可） |
-| 特征尺度 | 单尺度低分辨率 | 四级 \(\{1/4..1/32\}\) |
+| 特征尺度 | 单尺度低分辨率 | 四级 $\{1/4..1/32\}$ |
 | 位置编码 | 固定形状 PE | **无 PE**，Mix-FFN 提供位置先验 |
-| 解码器 | 多重 \(3\times3\) CNN 头 | **All-MLP**，参数占比极低 |
+| 解码器 | 多重 $3\times3$ CNN 头 | **All-MLP**，参数占比极低 |
 | 分辨率泛化 | PE 插值易掉点 | 测试分辨率更灵活 |
 
 ### 2.6 信息流直觉

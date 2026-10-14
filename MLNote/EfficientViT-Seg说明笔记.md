@@ -128,11 +128,11 @@ x → LiteMLA（多尺度 ReLU 线性注意力，残差）
 
 广义注意力：
 
-\[
+$$
 O_i=\sum_j\frac{\mathrm{Sim}(Q_i,K_j)}{\sum_{j'}\mathrm{Sim}(Q_i,K_{j'})}V_j
-\]
+$$
 
-取 \(\mathrm{Sim}(Q,K)=\mathrm{ReLU}(Q)\,\mathrm{ReLU}(K)^\top\)，利用乘法结合律先算 \(\sum_j \mathrm{ReLU}(K_j)^\top V_j\) 再与各 \(Q_i\) 相乘，复杂度相对 Softmax 的 \(O(N^2)\) 降为约 **\(O(N)\)**，且无 Softmax。
+取 $\mathrm{Sim}(Q,K)=\mathrm{ReLU}(Q)\,\mathrm{ReLU}(K)^\top$，利用乘法结合律先算 $\sum_j \mathrm{ReLU}(K_j)^\top V_j$ 再与各 $Q_i$ 相乘，复杂度相对 Softmax 的 $O(N^2)$ 降为约 **$O(N)$**，且无 Softmax。
 
 代价：注意力分布不够「尖」，局部刻画偏弱（论文 Figure 3）——故需卷积增强。
 
