@@ -92,10 +92,9 @@ ViT (2020) ── 分类
 
 ### 2.2 宏观结构（对照图）
 
-![EfficientViT 宏观结构（原论文 Figure 5）](../assets/EfficientViT%20structure.png)
+![EfficientViT 宏观结构（原论文 Figure 5）](../assets/EfficientViT-Seg/EfficientViT%20structure.png)
 
-上图（`../assets/EfficientViT structure.png`）即论文 **Figure 5**：标准 **Backbone + Head（Encoder–Decoder）**。
-
+上图（`../assets/EfficientViT-Seg/EfficientViT structure.png`）即论文 **Figure 5**：标准 **Backbone + Head（Encoder–Decoder）**。
 | 部分 | 内容 |
 |------|------|
 | **Input Stem** | Conv → DSConv，分辨率约 ×1/2 |
@@ -108,10 +107,9 @@ ViT (2020) ── 分类
 
 ### 2.3 EfficientViT Module 与多尺度线性注意力
 
-![EfficientViT 构建块与多尺度线性注意力（原论文 Figure 2）](../assets/EfficientViT%20multiscale%20RELU%20attention.png)
+![EfficientViT 构建块与多尺度线性注意力（原论文 Figure 2）](../assets/EfficientViT-Seg/EfficientViT%20multiscale%20RELU%20attention.png)
 
-上图（`../assets/EfficientViT multiscale RELU attention.png`）即论文 **Figure 2**：
-
+上图（`../assets/EfficientViT-Seg/EfficientViT multiscale RELU attention.png`）即论文 **Figure 2**：
 | 侧 | 内容 |
 |----|------|
 | **左：EfficientViT Module** | **Multi-Scale Linear Att**（上下文）→ **FFN+DWConv**（局部），均为残差式堆叠 |

@@ -96,10 +96,9 @@ FCN (2015)
 
 ### 2.3 总体结构（对照图）
 
-![DeepLabv3+ 结构示意（原论文 Figure 2）](../assets/DeepLabV3+-structure.png)
+![DeepLabv3+ 结构示意（原论文 Figure 2）](../assets/DeepLabV3+/DeepLabV3+-structure.png)
 
-上图（`../assets/DeepLabV3+-structure.png`）即论文 **Figure 2**，蓝框为 **Encoder**，红框为 **Decoder**：
-
+上图（`../assets/DeepLabV3+/DeepLabV3+-structure.png`）即论文 **Figure 2**，蓝框为 **Encoder**，红框为 **Decoder**：
 | 模块 | 作用 |
 |------|------|
 | **DCNN + Atrous Conv** | 骨干（ResNet / Xception）用空洞卷积控制 `output_stride` |

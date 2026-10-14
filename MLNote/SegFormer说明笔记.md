@@ -95,10 +95,9 @@ ViT / SETR (单尺度 + PE + 重解码)
 
 ### 2.2 总体结构（对照图）
 
-![SegFormer 框架示意（原论文 Figure 2）](../assets/SegFormer-structure.png)
+![SegFormer 框架示意（原论文 Figure 2）](../assets/SegFormer/SegFormer-structure.png)
 
-上图（`../assets/SegFormer-structure.png`）即论文 **Figure 2**，整体分为左右两块：
-
+上图（`../assets/SegFormer/SegFormer-structure.png`）即论文 **Figure 2**，整体分为左右两块：
 | 模块 | 作用 |
 |------|------|
 | **Hierarchical Transformer Encoder（MiT）** | 重叠 Patch Embed → 四级 Stage → 输出 $\{F_1..F_4\}$ |

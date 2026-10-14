@@ -73,10 +73,9 @@ U-Net 系列在 **MICCAI、ISBI、Medical Image Analysis** 等社区引用极高
 
 ### 2.2 总体结构（对照图）
 
-![U-Net 结构示意（原论文图）](../assets/UNet-structure.png)
+![U-Net 结构示意（原论文图）](../assets/UNet与UNet++/UNet-structure.png)
 
-上图（`../assets/UNet-structure.png`）即经典 U-Net：
-
+上图（`../assets/UNet与UNet++/UNet-structure.png`）即经典 U-Net：
 - **左侧收缩路径（contracting / encoder）**：重复「两个 $3\times3$ conv + ReLU」再接 **$2\times2$ max-pool（stride 2）**；每下采样一次，通道数通常翻倍（64→128→256→512→1024）。
 - **底部瓶颈（bottleneck）**：最深层的双卷积，感受野最大、语义最强。
 - **右侧扩张路径（expansive / decoder）**：每次 **$2\times2$ up-conv（转置卷积）** 上采样并减半通道，再与左侧对应层特征 **拼接（concat）**，再接双卷积。
@@ -118,10 +117,9 @@ U-Net 的关键洞察：**分割既要「看懂是什么」（深语义），也
 
 ### 3.2 总体结构（对照图）
 
-![UNet++ 结构示意（原论文图）](../assets/UNet++-structure.png)
+![UNet++ 结构示意（原论文图）](../assets/UNet与UNet++/UNet++-structure.png)
 
-上图（`../assets/UNet++-structure.png`）分三部分：
-
+上图（`../assets/UNet与UNet++/UNet++-structure.png`）分三部分：
 **(a) 整体**  
 节点 $X^{i,j}$：$i$ 为下采样深度，$j$ 为该深度上嵌套 skip 路径中的第 $j$ 个卷积块。
 

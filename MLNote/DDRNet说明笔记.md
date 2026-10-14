@@ -101,10 +101,9 @@ Dilation 高精度骨干（DeepLab / PSP）
 
 ### 2.3 总体结构（对照图）
 
-![DDRNet 分割总览（原论文 Figure 4）](../assets/DDRNet-structure.png)
+![DDRNet 分割总览（原论文 Figure 4）](../assets/DDRNet/DDRNet-structure.png)
 
-上图（`../assets/DDRNet-structure.png`）即论文 **Figure 4**：
-
+上图（`../assets/DDRNet/DDRNet-structure.png`）即论文 **Figure 4**：
 | 符号 | 含义 |
 |------|------|
 | **RB** | 连续 Residual Basic Blocks |
@@ -126,10 +125,9 @@ Image
 
 ### 2.4 双边融合（Bilateral Fusion）
 
-![双边融合细节（原论文 Figure 3）](../assets/Bilateral%20fusion%20in%20DDRNet.png)
+![双边融合细节（原论文 Figure 3）](../assets/DDRNet/Bilateral%20fusion%20in%20DDRNet.png)
 
-上图（`../assets/Bilateral fusion in DDRNet.png`）对应论文 **Figure 3** 与 Eq. 1：
-
+上图（`../assets/DDRNet/Bilateral fusion in DDRNet.png`）对应论文 **Figure 3** 与 Eq. 1：
 - **Low → High**：低分辨率特征经 **1×1 Conv+BN** 压通道，再 **×2 双线性上采样**，与高分辨率残差输出 **逐点相加**，之后再 ReLU。  
 - **High → Low**：高分辨率特征经 **3×3 Conv（stride=2）+BN** 下采样并对齐通道，再与低分辨率残差输出相加，之后再 ReLU。
 
@@ -138,10 +136,9 @@ DDRNet 在多个 stage 重复该交换，使细节支路被语义反复增强，
 
 ### 2.5 DAPPM（Deep Aggregation Pyramid Pooling）
 
-![DAPPM 结构（原论文 Figure 5）](../assets/DAPP%20module%20in%20DDRNet.png)
+![DAPPM 结构（原论文 Figure 5）](../assets/DDRNet/DAPP%20module%20in%20DDRNet.png)
 
-上图（`../assets/DAPP module in DDRNet.png`）即论文 **Figure 5** / Eq. 2：
-
+上图（`../assets/DDRNet/DAPP module in DDRNet.png`）即论文 **Figure 5** / Eq. 2：
 1. 输入为低分辨率支路末端特征（约 **1/64**）。  
 2. 并行：恒等 1×1，以及 AvgPool（k=5/s=2，k=9/s=4，k=17/s=8）与 **全局池化**，各接 1×1 后上采样回原尺寸。  
 3. **层级聚合**：较大尺度分支与前一尺度输出相加后再经 3×3（残差式加深），得到 $y_1\ldots y_5$。  
